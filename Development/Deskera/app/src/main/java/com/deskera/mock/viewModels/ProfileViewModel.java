@@ -18,7 +18,12 @@ public class ProfileViewModel extends ViewModel {
     }
 
     public void updateUser(User user) {
-        if (user != null)
-            DeskeraMockApplication.getDaoSession().getUserDao().update(user);
+        if (user != null && user.getUserId() > 0L && user.getHobby() != null && user.getEmail() != null && user.getSettings() != null &&
+                user.getSettings().getProbationDate() != null &&
+                user.getSettings().getTemperature() > 0.0 &&
+                user.getSettings().getTemperatureType() != null &&
+                user.getSettings().getDoj() != null)
+            DeskeraMockApplication.getDaoSession().getSettingsDao().update(user.getSettings());
+        DeskeraMockApplication.getDaoSession().getUserDao().update(user);
     }
 }
