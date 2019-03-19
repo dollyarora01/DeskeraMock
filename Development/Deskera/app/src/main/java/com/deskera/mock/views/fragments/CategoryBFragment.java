@@ -1,34 +1,43 @@
 package com.deskera.mock.views.fragments;
 
-
-import android.os.Bundle;
-
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
-
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
+import androidx.recyclerview.widget.RecyclerView;
+import butterknife.BindView;
+import rx.Subscriber;
 
 import com.deskera.mock.R;
+import com.deskera.mock.adapters.ItemsAdapter;
+import com.deskera.mock.entities.Item;
+import com.deskera.mock.viewModels.ItemsViewModel;
+
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class CategoryBFragment extends Fragment {
-
+public class CategoryBFragment extends BaseItemFragment {
 
     public CategoryBFragment() {
-        // Required empty public constructor
     }
-
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        TextView textView = new TextView(getActivity());
-        textView.setText(R.string.hello_blank_fragment);
-        return textView;
-    }
+    public void getItemDetails(Long userId) {
+        itemsViewModel.getItemsByCategory(userId, 2L).subscribe(new Subscriber<List<Item>>() {
+            @Override
+            public void onCompleted() {
 
+            }
+
+            @Override
+            public void onError(Throwable e) {
+
+            }
+
+            @Override
+            public void onNext(List<Item> itemList) {
+                setDisplay(itemList);
+            }
+        });
+    }
 }

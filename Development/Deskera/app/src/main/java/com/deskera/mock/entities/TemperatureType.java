@@ -1,4 +1,4 @@
-package com.deskera.mock.models;
+package com.deskera.mock.entities;
 
 public enum TemperatureType {
     DEFAULT(0),

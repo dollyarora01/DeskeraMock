@@ -1,4 +1,4 @@
-package com.gladiris.spiderg.android.androidutils;
+package com.deskera.mock.utils;
 
 /*
  * Copyright (C) 2013 The Android Open Source Project
@@ -30,7 +30,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.text.TextPaint;
 
-import com.gladiris.spiderg.android.R;
+import com.deskera.mock.R;
 
 
 /**

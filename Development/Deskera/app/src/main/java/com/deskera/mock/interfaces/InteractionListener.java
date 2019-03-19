@@ -1,4 +1,5 @@
 package com.deskera.mock.interfaces;
 
-public interface InteractionListener {
+public interface InteractionListener<T> {
+    void onInteraction(T value);
 }

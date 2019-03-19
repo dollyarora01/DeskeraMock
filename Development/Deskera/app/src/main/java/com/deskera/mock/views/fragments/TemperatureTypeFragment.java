@@ -1,10 +1,10 @@
 package com.deskera.mock.views.fragments;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -14,27 +14,26 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.Switch;
 import android.widget.TextView;
 
 import com.deskera.mock.R;
+import com.deskera.mock.entities.TemperatureType;
 import com.deskera.mock.interfaces.InteractionListener;
-import com.deskera.mock.viewModels.SettingsViewModel;
 
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link TemperatureType.OnFragmentInteractionListener} interface
+ * {@link TemperatureTypeFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
  * create an instance of this fragment.
  */
-public class TemperatureType extends Fragment {
-    @BindView(R.id.llTempertureType)
-    LinearLayout llTempertureType;
+public class TemperatureTypeFragment extends Fragment {
+    @BindView(R.id.llTemperature)
+    LinearLayout llTemperature;
 
     private InteractionListener<String> mListener;
 
-    public TemperatureType() {
+    public TemperatureTypeFragment() {
         // Required empty public constructor
     }
 
@@ -59,7 +58,6 @@ public class TemperatureType extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        mListener = (InteractionListener)getParentFragment();
     }
 
 
@@ -93,8 +91,16 @@ public class TemperatureType extends Fragment {
         relativeLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mListener != null)
-                    mListener.onInteraction(key);
+                if (mListener != null) {
+                    Fragment fragment = getFragmentManager().findFragmentByTag(getContext().getResources().getString(R.string.title_settings));
+                    ((SettingsFragment) fragment).onInteraction(key);
+                    if(getFragmentManager().getBackStackEntryCount() > 0){
+                        getFragmentManager().popBackStackImmediate();
+                    }
+                    else{
+                        getActivity().onBackPressed();
+                    }
+                }
             }
         });
         //KEY TEXT VIEW SETTINGS START
@@ -108,7 +114,15 @@ public class TemperatureType extends Fragment {
         relativeLayout.addView(keyTextView, keyParams);
         //KEY TEXT VIEW SETTINGS END
 
+        if (llTemperature == null) {
+            llTemperature = new LinearLayout(getContext());
+            LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
+                    RelativeLayout.LayoutParams.MATCH_PARENT,
+                    RelativeLayout.LayoutParams.WRAP_CONTENT);
+            llTemperature.setLayoutParams(llp);
+            llTemperature.setOrientation(LinearLayout.VERTICAL);
+        }
 
-        llTempertureType.addView(relativeLayout, rlp);
+        llTemperature.addView(relativeLayout, rlp);
     }
 }

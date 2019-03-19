@@ -20,12 +20,12 @@ import com.deskera.mock.adapters.CategoryPagerAdapter;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ItemsFragment extends Fragment {
+public class ItemsPagerFragment extends Fragment {
     FragmentPagerAdapter adapter;
     @BindView(R.id.vpPager)
     ViewPager vpPager;
 
-    public ItemsFragment() {
+    public ItemsPagerFragment() {
     }
 
 

@@ -1,5 +1,6 @@
 package com.deskera.mock.views.fragments;
 
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProviders;
 
@@ -15,6 +16,7 @@ import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -22,20 +24,32 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.deskera.mock.R;
+import com.deskera.mock.entities.Settings;
+import com.deskera.mock.entities.TemperatureType;
 import com.deskera.mock.interfaces.InteractionListener;
 import com.deskera.mock.viewModels.SettingsViewModel;
 
-public class Settings extends Fragment implements InteractionListener<String> {
+import java.text.SimpleDateFormat;
 
-    @BindView(R.id.flSettings)
-    FrameLayout flSettings;
-    @BindView(R.id.llSettings)
-    LinearLayout llSettings;
+public class SettingsFragment extends Fragment implements InteractionListener<String> {
+
     private SettingsViewModel settingViewModel;
     com.deskera.mock.entities.Settings settings;
+    @BindView(R.id.llSettings)
+    LinearLayout llSettings;
+    Toolbar profileToolbar;
+    TextView tvBack;
 
-    public static Settings newInstance() {
-        return new Settings();
+    public Settings getSettings() {
+        return settings;
+    }
+
+    public void setSettings(Settings settings) {
+        this.settings = settings;
+    }
+
+    public static SettingsFragment newInstance() {
+        return new SettingsFragment();
     }
 
     @Override
@@ -43,6 +57,9 @@ public class Settings extends Fragment implements InteractionListener<String> {
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.settings_fragment, container, false);
         ButterKnife.bind(this, view);
+        profileToolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
+        tvBack = (TextView) profileToolbar.findViewById(R.id.tvBack);
+        tvBack.setVisibility(View.GONE);
         return view;
     }
 
@@ -53,7 +70,7 @@ public class Settings extends Fragment implements InteractionListener<String> {
         buildDisplay();
     }
 
-    private void buildTextSettingLayout(View.OnClickListener clickListener, boolean isSwitch, String key, String value, boolean switchValue) {
+    private void buildTextSettingLayout(View.OnClickListener clickListener, CompoundButton.OnCheckedChangeListener onCheckedChangeListener, boolean isSwitch, String key, String value, boolean switchValue) {
         RelativeLayout relativeLayout = new RelativeLayout(new ContextThemeWrapper(getContext(), R.style.SettingRow));
         RelativeLayout.LayoutParams rlp = new RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.MATCH_PARENT,
@@ -85,6 +102,7 @@ public class Settings extends Fragment implements InteractionListener<String> {
         if (isSwitch) {
             Switch switchSetting = new Switch(getContext());
             switchSetting.setChecked(switchValue);
+            switchSetting.setOnCheckedChangeListener(onCheckedChangeListener);
             relativeLayout.addView(switchSetting, valueParams);
         } else {
             TextView valueTextView = new TextView(new ContextThemeWrapper(getContext(), R.style.SettingValue));
@@ -92,7 +110,14 @@ public class Settings extends Fragment implements InteractionListener<String> {
             relativeLayout.addView(valueTextView, valueParams);
         }
         //VALUE TEXT VIEW SETTINGS END
-
+        if (llSettings == null) {
+            llSettings = new LinearLayout(getContext());
+            LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(
+                    RelativeLayout.LayoutParams.MATCH_PARENT,
+                    RelativeLayout.LayoutParams.WRAP_CONTENT);
+            llSettings.setLayoutParams(llp);
+            llSettings.setOrientation(LinearLayout.VERTICAL);
+        }
         llSettings.addView(relativeLayout, rlp);
     }
 
@@ -111,15 +136,15 @@ public class Settings extends Fragment implements InteractionListener<String> {
 
     private void buildDisplay() {
         settingViewModel.getSettings(1L).observe(this, s -> {
-            settings=s;
+            setSettings(s);
             View.OnClickListener temperatureOnClickListener = new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Fragment fragment;
                     FragmentTransaction transaction;
-                    fragment = new TemperatureType();
+                    fragment = new TemperatureTypeFragment();
                     transaction = getFragmentManager().beginTransaction();
-                    transaction.replace(R.id.flSettings, fragment, getResources().getString(R.string.fragment_temperature));
+                    transaction.replace(R.id.flMasterSetting, fragment, getResources().getString(R.string.fragment_temperature));
                     transaction.addToBackStack(null);
                     transaction.commit();
                 }
@@ -129,26 +154,49 @@ public class Settings extends Fragment implements InteractionListener<String> {
                 public void onClick(View v) {
                     Fragment fragment;
                     FragmentTransaction transaction;
-                    fragment = new TemperatureType();
+                    fragment = new DetailsFragment();
                     transaction = getFragmentManager().beginTransaction();
-                    transaction.replace(R.id.flSettings, fragment, getResources().getString(R.string.fragment_view_details));
+                    transaction.replace(R.id.flMasterSetting, fragment, getResources().getString(R.string.fragment_view_details));
                     transaction.addToBackStack(null);
                     transaction.commit();
                 }
             };
-            buildTextSettingLayout(temperatureOnClickListener, false, "Temperature Display Units", s.getTemperatureType().name(), false);
-            buildTextSettingLayout(null, true, "Sound", null, s.getSound());
-            buildBlankSettingLayout();
-            buildTextSettingLayout(null, true, "Notifications", null, s.getNotification());
-            buildTextSettingLayout(null, false, "Date probation ends", s.getProbationDate() != null ? s.getProbationDate().toString() : "", false);
-            buildBlankSettingLayout();
-            buildTextSettingLayout(viewDetailsOnClickListener, false, "View Details", "", false);
+            CompoundButton.OnCheckedChangeListener soundOnCheckListener = new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    getSettings().setSound(isChecked);
+                    settingViewModel.updateSettings(getSettings());
+                }
+            };
+            CompoundButton.OnCheckedChangeListener notificationsOnCheckListener = new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    getSettings().setNotification(isChecked);
+                    settingViewModel.updateSettings(getSettings());
+                }
+            };
+
+            if (llSettings != null && llSettings.getChildCount() == 0) {
+                buildTextSettingLayout(temperatureOnClickListener, null, false, "Temperature Display Units", s.getTemperatureType().name(), false);
+                buildTextSettingLayout(null, soundOnCheckListener, true, "Sound", null, s.getSound());
+                buildBlankSettingLayout();
+                buildTextSettingLayout(null, notificationsOnCheckListener, true, "Notifications", null, s.getNotification());
+                buildTextSettingLayout(null, null, false, "Date probation ends", s.getProbationDate() != null ? new SimpleDateFormat("dd/MM/yyyy").format(s.getProbationDate()) : "", false);
+                buildBlankSettingLayout();
+                buildTextSettingLayout(viewDetailsOnClickListener, null, false, "View Details", "", false);
+            }
         });
     }
 
+    public void updateTemperature(String temperatureType) {
+        getSettings().setTemperatureType(TemperatureType.valueOf(temperatureType));
+        settingViewModel.updateSettings(getSettings());
+    }
+
+
     @Override
     public void onInteraction(String value) {
-        settings.setTemperatureType(com.deskera.mock.entities.TemperatureType.valueOf(value));
-        settingViewModel.updateSettings(settings);
+        updateTemperature(value);
     }
+
 }

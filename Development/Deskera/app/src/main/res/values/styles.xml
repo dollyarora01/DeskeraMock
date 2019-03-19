@@ -20,7 +20,7 @@
         <item name="android:textStyle">bold</item>
     </style>
     <style name="profile_toolbar_title_collapsed" parent="@android:style/TextAppearance.Medium">
-        <item name="android:textSize">20dp</item>
+        <item name="android:textSize">18dp</item>
         <item name="android:textColor">@android:color/white</item>
     </style>
 
