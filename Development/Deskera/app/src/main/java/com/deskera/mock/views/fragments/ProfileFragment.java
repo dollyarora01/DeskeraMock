@@ -122,7 +122,7 @@ public class ProfileFragment extends Fragment {
                             Calendar newDate = Calendar.getInstance();
                             newDate.set(year, monthOfYear, dayOfMonth);
                             selectedDate = newDate.getTime().getTime();
-                            etDoj.setText(dateFormatter.format(newCalendar.getTime()));
+                            etDoj.setText(dateFormatter.format(newDate.getTime()));
                         }
                     }, newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
                     startDatePicker.show();
