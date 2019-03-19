@@ -51,6 +51,7 @@ public class ProfileFragment extends Fragment {
     TextView tvTitle;
     Toolbar profileToolbar;
     CollapsingToolbarLayout ctlProfile;
+    Long selectedDate;
     //endregion
 
     //region Variables
@@ -118,7 +119,9 @@ public class ProfileFragment extends Fragment {
                     Calendar newCalendar = Calendar.getInstance();
                     DatePickerDialog startDatePicker = new DatePickerDialog(getActivity(), new DatePickerDialog.OnDateSetListener() {
                         public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                            newCalendar.set(year, monthOfYear, dayOfMonth);
+                            Calendar newDate = Calendar.getInstance();
+                            newDate.set(year, monthOfYear, dayOfMonth);
+                            selectedDate = newDate.getTime().getTime();
                             etDoj.setText(dateFormatter.format(newCalendar.getTime()));
                         }
                     }, newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
@@ -134,11 +137,7 @@ public class ProfileFragment extends Fragment {
                 else
                     displayError(etEmail, "Please enter valid email");
                 if (etDoj.getText() != null && !etDoj.getText().toString().isEmpty()) {
-                    try {
-                        getUser().getSettings().setDoj(dateFormatter.parse(etDoj.getText().toString()).getTime());
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    }
+                    getUser().getSettings().setDoj(selectedDate);
                 } else
                     displayError(etDoj, "Please enter valid date of joining");
                 if (etHobby.getText() != null && !etHobby.getText().toString().isEmpty())
